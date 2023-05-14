@@ -11,6 +11,15 @@ const Private = ({ children }) => {
     ) : (
       <Navigate to="/login" state={location} replace={true} />
     );
+  } else {
+    return (
+      <div className="flex items-center justify-center py-10 spinner spinner-primary">
+        <div
+          className="radial-progress text-primary-content animate-spin"
+          style={{ "--value": 50 }}
+        ></div>
+      </div>
+    );
   }
 };
 

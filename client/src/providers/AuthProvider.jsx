@@ -26,7 +26,9 @@ const AuthProvider = ({ children }) => {
   };
   const logOut = () => {
     signOut(auth)
-      .then(() => {})
+      .then(() => {
+        localStorage.removeItem("token");
+      })
       .catch((err) => console.log(err));
   };
   useEffect(() => {

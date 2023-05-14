@@ -14,7 +14,16 @@ const NavBar = () => {
         {" "}
         <Link to="/about">About</Link>{" "}
       </li>
-      <li>{user === null && <Link to="/login">Login</Link>}</li>
+      {user === null && (
+        <li>
+          <Link to="/login">Login</Link>
+        </li>
+      )}
+      {user !== null && (
+        <li>
+          <Link to="/bookings">Bookings</Link>
+        </li>
+      )}
     </>
   );
   console.log(user);

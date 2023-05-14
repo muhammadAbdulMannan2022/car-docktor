@@ -1,5 +1,6 @@
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const jwt = require("jsonwebtoken");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
@@ -20,13 +21,41 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
-
+const verifyJWT = (req, res, next) => {
+  const authorization = req.headers?.authorization;
+  if (!authorization) {
+    return res
+      .status(401)
+      .send({ error: true, message: "unauthorized access" });
+  } else {
+    const token = authorization.split(" ")[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
+      if (error) {
+        return res
+          .status(403)
+          .send({ error: true, message: "unauthorized access" });
+      } else {
+        req.decoded = decoded;
+        next();
+      }
+    });
+  }
+};
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const serviceCollection = client.db("carDoctor").collection("services");
     const bookingsCollection = client.db("carDoctor").collection("bookings");
+    // jwt
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      console.log(user, "line 37");
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res.send({ token });
+    });
     // get
     app.get("/services", async (req, res) => {
       const cursor = serviceCollection.find();
@@ -40,10 +69,26 @@ async function run() {
       res.send(resault);
     });
     // bookings
+    app.get("/bookings", verifyJWT, async (req, res) => {
+      // console.log(req.query.email);
+      // console.log(req.headers?.authorization);
+
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email };
+      }
+      const result = await bookingsCollection.find(query).toArray();
+      res.send(result);
+    });
     app.post("/bookings", async (req, res) => {
       const booking = req.body;
       const resault = await bookingsCollection.insertOne(booking);
       res.send(resault);
+    });
+    app.delete("/bookings/:id", async (req, res) => {
+      const queiry = { _id: new ObjectId(req.params.id) };
+      const result = await bookingsCollection.deleteOne(queiry);
+      res.send(result);
     });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });

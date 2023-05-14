@@ -6,6 +6,7 @@ import { AuthContext } from "../../providers/AuthProvider";
 const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  // const { user, loading } = useContext(AuthContext);
   const { signIn } = useContext(AuthContext);
   const form1 = location?.state?.pathname || "/";
   const handleLogin = (event) => {
@@ -15,8 +16,32 @@ const Login = () => {
     const password = form.password.value;
     console.log(email, password);
     signIn(email, password)
-      .then(() => {
-        console.log(form1);
+      .then((resault) => {
+        const user = resault.user;
+        if (user) {
+          const userEmail = {
+            email: user?.email,
+          };
+          console.log(JSON.stringify(userEmail));
+          fetch("http://localhost:5000/jwt", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userEmail),
+          })
+            .then((response) => {
+              return response.json();
+            })
+            .then((data) => {
+              // Warning: local Storage is not best
+              localStorage.setItem("token", data.token);
+            })
+            .catch((error) => {
+              console.error("Error:", error.message);
+            });
+        }
+        // console.log("logged in", user);
         navigate(form1);
       })
       .catch((error) => console.log(error));
