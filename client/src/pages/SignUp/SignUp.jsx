@@ -17,8 +17,35 @@ const SignUp = () => {
     console.log(name, email, password);
 
     createUser(email, password)
-      .then(() => {
-        navigate(form1);
+      .then((resault) => {
+        // add tikin
+        const user = resault.user;
+        console.log(user);
+        if (user) {
+          const userEmail = {
+            email: user?.email,
+          };
+          console.log(JSON.stringify(userEmail));
+          fetch("http://localhost:5000/jwt", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userEmail),
+          })
+            .then((response) => {
+              return response.json();
+            })
+            .then((data) => {
+              // Warning: local Storage is not best
+              localStorage.setItem("token", data.token);
+              navigate(form1);
+            })
+            .catch((error) => {
+              console.error("Error:", error.message);
+            });
+        }
+        // navigaite
       })
       .catch((error) => console.log(error));
   };
@@ -60,7 +87,7 @@ const SignUp = () => {
                   <span className="label-text">Confirm Password</span>
                 </label>
                 <input
-                  type="text"
+                  type="password"
                   name="password"
                   placeholder="password"
                   className="input input-bordered"

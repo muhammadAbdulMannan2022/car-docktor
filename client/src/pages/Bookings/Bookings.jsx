@@ -1,10 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
+import Error from "../Error/Error";
 
 const Bookings = () => {
   const { user, loading } = useContext(AuthContext);
   const [bookings, setBooking] = useState([]);
   const [toast, setToast] = useState(false);
+  const [error, setError] = useState(false);
 
   const url = `http://localhost:5000/bookings?email=${user?.email}`;
   useEffect(() => {
@@ -15,8 +17,15 @@ const Bookings = () => {
       },
     })
       .then((res) => res.json())
-      .then((data) => setBooking(data));
-  }, [loading]);
+      .then((data) => {
+        if (!data.error) {
+          setError(false);
+          setBooking(data);
+        } else {
+          setError(true);
+        }
+      });
+  }, [loading, url]);
   const removeOneFormBooking = (id) => {
     const yesOrNo = confirm("do you want remove this service ?");
     if (yesOrNo) {
@@ -39,37 +48,44 @@ const Bookings = () => {
   return (
     <div>
       <div className="overflow-x-auto w-full px-5 rounded">
-        <table className="table w-full my-5 border border-gray-600 rounded">
-          {/* head */}
-          <thead>
-            <tr>
-              <th>
-                <label className="text-xl">X</label>
-              </th>
-              <th>Services</th>
-              <th>Price</th>
-              <th>Deatails</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* row  */}
-            {bookings.map((booking) => {
-              const { _id, img, service, date, price } = booking;
-              return (
-                <TabilItem
-                  key={_id}
-                  id={_id}
-                  img={img}
-                  service={service}
-                  date={date}
-                  price={price}
-                  handleClick={removeOneFormBooking}
-                />
-              );
-            })}
-          </tbody>
-        </table>
+        {error ? (
+          <Error error="Authorization Failed" />
+        ) : (
+          <table className="table w-full my-5 border border-gray-600 rounded">
+            {/* head */}
+            <thead>
+              <tr>
+                <th>
+                  <label className="text-xl">X</label>
+                </th>
+                <th>Services</th>
+                <th>Price</th>
+                <th>Deatails</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* row  */}
+              {error ? (
+                <Error error="Authorization Failed" />
+              ) : (
+                bookings.map((booking) => {
+                  const { _id, img, service, date, price } = booking;
+                  return (
+                    <TabilItem
+                      key={_id}
+                      id={_id}
+                      img={img}
+                      service={service}
+                      date={date}
+                      price={price}
+                      handleClick={removeOneFormBooking}
+                    />
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
       <div className={`toast toast-top toast-end ${toast ? "" : "hidden"}`}>
         <div className="alert alert-info">
