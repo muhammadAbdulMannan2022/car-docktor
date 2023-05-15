@@ -8,7 +8,7 @@ const Bookings = () => {
   const [toast, setToast] = useState(false);
   const [error, setError] = useState(false);
 
-  const url = `http://localhost:5000/bookings?email=${user?.email}`;
+  const url = `https://car-doctor-server-mocha.vercel.app/bookings?email=${user?.email}`;
   useEffect(() => {
     fetch(url, {
       method: "GET",
@@ -29,7 +29,7 @@ const Bookings = () => {
   const removeOneFormBooking = (id) => {
     const yesOrNo = confirm("do you want remove this service ?");
     if (yesOrNo) {
-      fetch(`http://localhost:5000/bookings/${id}`, {
+      fetch(`https://car-doctor-server-mocha.vercel.app/bookings/${id}`, {
         method: "DELETE",
       })
         .then((res) => res.json())

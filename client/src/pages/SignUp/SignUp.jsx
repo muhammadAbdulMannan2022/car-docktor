@@ -26,7 +26,7 @@ const SignUp = () => {
             email: user?.email,
           };
           console.log(JSON.stringify(userEmail));
-          fetch("http://localhost:5000/jwt", {
+          fetch("https://car-doctor-server-mocha.vercel.app/jwt", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
